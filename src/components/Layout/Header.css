@@ -1,0 +1,185 @@
+.app-header {
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 2rem;
+  width: 100%;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.bc-muted {
+  color: var(--text-muted);
+}
+
+.bc-sep {
+  color: var(--border-color);
+}
+
+.bc-current {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.header-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 280px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--text-muted);
+}
+
+.header-search-bar input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem 0.45rem 2.4rem;
+  font-size: 0.825rem;
+  color: var(--text-main);
+}
+
+.header-search-bar input:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+}
+
+/* Middle: Avatars & Priority */
+.header-middle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-stack-item {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #ffffff;
+  border: 2px solid var(--bg-header);
+  margin-left: -6px;
+}
+
+.avatar-stack-item:first-child {
+  margin-left: 0;
+}
+
+.priority-filter-box {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.filter-icon {
+  color: var(--text-muted);
+}
+
+.priority-select {
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.priority-select option {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.overdue-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 9999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.overdue-dot {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+
+/* Header Right */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.create-task-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.kbd-shortcut {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.675rem;
+  font-family: inherit;
+}
+
+.live-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}

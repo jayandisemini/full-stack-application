@@ -1,0 +1,281 @@
+:root {
+  /* Color Palette - Dark Mode (Default) */
+  --bg-app: #080c15;
+  --bg-sidebar: #0d1322;
+  --bg-header: #0d1322;
+  --bg-card: #131b2e;
+  --bg-card-hover: #18223a;
+  --bg-column: #0f172a;
+  --bg-input: #121929;
+  --bg-pill: rgba(255, 255, 255, 0.06);
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(99, 102, 241, 0.4);
+
+  --text-main: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent-purple: #6366f1;
+  --accent-purple-glow: rgba(99, 102, 241, 0.35);
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+
+  /* Priority Colors */
+  --priority-urgent-bg: rgba(239, 68, 68, 0.15);
+  --priority-urgent-text: #ef4444;
+  --priority-high-bg: rgba(245, 158, 11, 0.15);
+  --priority-high-text: #f59e0b;
+  --priority-medium-bg: rgba(59, 130, 246, 0.15);
+  --priority-medium-text: #3b82f6;
+  --priority-low-bg: rgba(100, 116, 139, 0.18);
+  --priority-low-text: #94a3b8;
+
+  /* Tag Colors */
+  --tag-bg: rgba(99, 102, 241, 0.12);
+  --tag-text: #818cf8;
+
+  /* Status Dots */
+  --status-backlog: #94a3b8;
+  --status-todo: #3b82f6;
+  --status-inprogress: #a855f7;
+  --status-completed: #10b981;
+
+  --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme='light'] {
+  --bg-app: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-header: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-column: #f1f5f9;
+  --bg-input: #f1f5f9;
+  --bg-pill: #e2e8f0;
+
+  --border-color: #e2e8f0;
+  --border-hover: #6366f1;
+
+  --text-main: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --accent-purple: #4f46e5;
+  --accent-purple-glow: rgba(79, 70, 229, 0.2);
+
+  --priority-urgent-bg: #fee2e2;
+  --priority-urgent-text: #dc2626;
+  --priority-high-bg: #fef3c7;
+  --priority-high-text: #d97706;
+  --priority-medium-bg: #dbeafe;
+  --priority-medium-text: #2563eb;
+  --priority-low-bg: #f1f5f9;
+  --priority-low-text: #64748b;
+
+  --tag-bg: #e0e7ff;
+  --tag-text: #4338ca;
+
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Layout Grid */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.page-wrapper {
+  padding: 1.75rem 2rem;
+  flex: 1;
+}
+
+/* Buttons & Inputs Reset */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Glass & Glow Utility */
+.glass-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 15px var(--accent-purple-glow);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.btn-primary:hover {
+  background: var(--accent-gradient-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-purple-glow);
+}
+
+.btn-secondary {
+  background: var(--bg-pill);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  font-weight: 500;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-hover);
+}
+
+/* Badge System */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-urgent {
+  background: var(--priority-urgent-bg);
+  color: var(--priority-urgent-text);
+}
+
+.badge-high {
+  background: var(--priority-high-bg);
+  color: var(--priority-high-text);
+}
+
+.badge-medium {
+  background: var(--priority-medium-bg);
+  color: var(--priority-medium-text);
+}
+
+.badge-low {
+  background: var(--priority-low-bg);
+  color: var(--priority-low-text);
+}
+
+.tag-pill {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* Avatar Component */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.725rem;
+  color: #ffffff;
+  border: 2px solid var(--bg-sidebar);
+}
+
+/* Modal Backdrop */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 1.75rem;
+}

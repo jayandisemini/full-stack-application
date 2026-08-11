@@ -1,0 +1,73 @@
+.settings-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+}
+
+.settings-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.settings-sub {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settings-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.85rem;
+}
+
+.card-icon {
+  color: var(--accent-purple);
+}
+
+.card-title-row h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.card-title-row p {
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.item-title {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.item-desc {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}

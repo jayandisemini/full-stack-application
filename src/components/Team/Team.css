@@ -1,0 +1,135 @@
+.team-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.team-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.team-sub {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.member-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.member-card-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.member-avatar-lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #ffffff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+}
+
+.status-indicator.online { background: #10b981; }
+.status-indicator.idle { background: #f59e0b; }
+.status-indicator.offline { background: #64748b; }
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.member-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.member-role {
+  font-size: 0.8rem;
+  color: var(--accent-purple);
+  font-weight: 600;
+}
+
+.member-email-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.member-card-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.65rem 0.5rem;
+}
+
+.m-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.m-stat-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.m-stat-val.green { color: #10b981; }
+.m-stat-val.purple { color: #a855f7; }
+
+.m-stat-label {
+  font-size: 0.675rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
