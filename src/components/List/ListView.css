@@ -72,14 +72,39 @@
   color: #ffffff;
 }
 
-.export-csv-btn {
-  padding: 0.45rem 0.9rem;
+.category-select-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
   font-size: 0.8rem;
+}
+
+.cat-icon {
+  color: var(--text-muted);
+}
+
+.category-select-box select {
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.category-select-box select option {
+  background: var(--bg-card);
+  color: var(--text-main);
 }
 
 /* Table */
 .table-card {
   overflow-x: auto;
+  position: relative;
 }
 
 .tasks-table {
@@ -97,6 +122,27 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.sortable-th:hover {
+  color: var(--text-main);
+}
+
+.sort-icon-idle {
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin-left: 0.25rem;
+}
+
+.sort-icon-active {
+  color: var(--accent-purple);
+  margin-left: 0.25rem;
+}
+
 .tasks-table td {
   padding: 0.95rem 1rem;
   font-size: 0.85rem;
@@ -110,6 +156,158 @@
 
 .tasks-table tbody tr.row-selected {
   background: rgba(99, 102, 241, 0.08);
+}
+
+/* Inline Editable Dropdowns */
+.inline-editable-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.inline-edit-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.inline-edit-btn:hover {
+  opacity: 0.85;
+}
+
+.inline-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.35rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 140px;
+}
+
+.inline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.inline-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
+
+.inline-item.selected {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.points-pill {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Floating Bulk Actions Bar */
+.bulk-actions-floating-bar {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 1000;
+  animation: slideUpFloating 0.2s ease-out;
+}
+
+@keyframes slideUpFloating {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.bulk-count-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #818cf8;
+}
+
+.bulk-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.bulk-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.bulk-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.bulk-btn-delete {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.bulk-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.bulk-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.bulk-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
 }
 
 .cb-btn {
