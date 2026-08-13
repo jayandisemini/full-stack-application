@@ -108,13 +108,16 @@ export const TasksProvider = ({ children }) => {
     updateTasksState(updated);
   };
 
+  const [defaultColumnId, setDefaultColumnId] = useState('backlog');
+
   const deleteTask = (taskId) => {
     const updated = tasks.filter(t => t.id !== taskId);
     updateTasksState(updated);
   };
 
-  const openCreateModal = () => {
+  const openCreateModal = (targetColId = 'backlog') => {
     setSelectedTask(null);
+    setDefaultColumnId(targetColId);
     setIsModalOpen(true);
   };
 
@@ -201,7 +204,8 @@ export const TasksProvider = ({ children }) => {
         openCreateModal,
         openEditModal,
         closeModal,
-        selectedTask
+        selectedTask,
+        defaultColumnId
       }}
     >
       {children}

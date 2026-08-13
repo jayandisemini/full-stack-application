@@ -4,13 +4,13 @@ import { useTasks } from '../context/TasksContext';
 import './TaskModal.css';
 
 export default function TaskModal() {
-  const { closeModal, selectedTask, addTask, updateTask, teamMembers } = useTasks();
+  const { closeModal, selectedTask, addTask, updateTask, teamMembers, defaultColumnId } = useTasks();
 
   const isEditing = !!selectedTask;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [columnId, setColumnId] = useState('backlog');
+  const [columnId, setColumnId] = useState(defaultColumnId || 'backlog');
   const [priority, setPriority] = useState('MEDIUM');
   const [category, setCategory] = useState('Frontend');
   const [assigneeId, setAssigneeId] = useState('sc');
@@ -27,8 +27,10 @@ export default function TaskModal() {
       setAssigneeId(selectedTask.assigneeId || 'sc');
       setDueDate(selectedTask.dueDate || 'Aug 30, 2026');
       setStoryPoints(selectedTask.storyPoints ? String(selectedTask.storyPoints) : '5');
+    } else {
+      setColumnId(defaultColumnId || 'backlog');
     }
-  }, [selectedTask]);
+  }, [selectedTask, defaultColumnId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
