@@ -92,10 +92,23 @@
   color: #ffffff;
   border: 2px solid var(--bg-header);
   margin-left: -6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .avatar-stack-item:first-child {
   margin-left: 0;
+}
+
+.avatar-stack-item:hover {
+  transform: translateY(-2px);
+  z-index: 2;
+}
+
+.avatar-stack-item.selected {
+  outline: 2px solid var(--accent-purple);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+  z-index: 3;
 }
 
 .priority-filter-box {
@@ -127,7 +140,7 @@
   color: var(--text-main);
 }
 
-.overdue-badge {
+.overdue-badge-btn {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -138,6 +151,15 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.overdue-badge-btn:hover,
+.overdue-badge-btn.active {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .overdue-dot {
@@ -145,6 +167,57 @@
   height: 6px;
   background: #ef4444;
   border-radius: 50%;
+}
+
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+}
+
+/* Preview States Bar */
+.preview-states-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.preview-label {
+  color: var(--text-muted);
+}
+
+.preview-link {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.preview-link:hover,
+.preview-link.active {
+  color: #818cf8;
+  font-weight: 600;
 }
 
 /* Header Right */

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, Filter, AlertCircle, Radio } from 'lucide-react';
+import { Search, Plus, Filter, X } from 'lucide-react';
 import { useTasks } from '../../context/TasksContext';
 import './Header.css';
 
@@ -9,6 +9,14 @@ export default function Header({ activeTab }) {
     setSearchQuery,
     priorityFilter,
     setPriorityFilter,
+    selectedAssignee,
+    toggleAssigneeFilter,
+    overdueOnly,
+    toggleOverdueFilter,
+    clearAllFilters,
+    activeFilterCount,
+    previewState,
+    setPreviewState,
     teamMembers,
     stats,
     openCreateModal
@@ -52,16 +60,20 @@ export default function Header({ activeTab }) {
         <div className="header-middle">
           {/* Team Member Avatars Stack */}
           <div className="avatar-stack">
-            {teamMembers.slice(0, 6).map(member => (
-              <div
-                key={member.id}
-                className="avatar-stack-item"
-                style={{ backgroundColor: member.color }}
-                title={`${member.name} (${member.role})`}
-              >
-                {member.initials}
-              </div>
-            ))}
+            {teamMembers.slice(0, 6).map(member => {
+              const isSelected = selectedAssignee === member.id;
+              return (
+                <button
+                  key={member.id}
+                  onClick={() => toggleAssigneeFilter(member.id)}
+                  className={`avatar-stack-item ${isSelected ? 'selected' : ''}`}
+                  style={{ backgroundColor: member.color }}
+                  title={`Filter by ${member.name}`}
+                >
+                  {member.initials}
+                </button>
+              );
+            })}
           </div>
 
           {/* Priority Filter Dropdown */}
@@ -80,11 +92,23 @@ export default function Header({ activeTab }) {
             </select>
           </div>
 
-          {/* Overdue Badge */}
-          <div className="overdue-badge">
+          {/* Overdue Badge Toggle */}
+          <button
+            onClick={toggleOverdueFilter}
+            className={`overdue-badge-btn ${overdueOnly ? 'active' : ''}`}
+            title="Toggle Overdue Filter"
+          >
             <span className="overdue-dot"></span>
             <span>Overdue {stats.overdueCount}</span>
-          </div>
+          </button>
+
+          {/* Clear Filters Button */}
+          {activeFilterCount > 0 && (
+            <button onClick={clearAllFilters} className="clear-filters-btn">
+              <X size={13} />
+              <span>Clear {activeFilterCount} {activeFilterCount === 1 ? 'filter' : 'filters'}</span>
+            </button>
+          )}
         </div>
 
         {/* Right Side: Create Button & Status Badge */}
@@ -94,12 +118,36 @@ export default function Header({ activeTab }) {
             <span>Create New Task</span>
             <kbd className="kbd-shortcut">⌘K</kbd>
           </button>
-
-          <div className="live-status-pill">
-            <span className="live-dot"></span>
-            <span>Live • SyncBoard v2.4.1</span>
-          </div>
         </div>
+      </div>
+
+      {/* Sub-Header Bar: Preview States Switcher */}
+      <div className="preview-states-bar">
+        <span className="preview-label">Preview states:</span>
+        <button
+          className={`preview-link ${previewState === 'normal' ? 'active' : ''}`}
+          onClick={() => setPreviewState('normal')}
+        >
+          Normal
+        </button>
+        <button
+          className={`preview-link ${previewState === 'loading' ? 'active' : ''}`}
+          onClick={() => setPreviewState('loading')}
+        >
+          Loading
+        </button>
+        <button
+          className={`preview-link ${previewState === 'error' ? 'active' : ''}`}
+          onClick={() => setPreviewState('error')}
+        >
+          Error
+        </button>
+        <button
+          className={`preview-link ${previewState === '404' ? 'active' : ''}`}
+          onClick={() => setPreviewState('404')}
+        >
+          404 Task
+        </button>
       </div>
     </header>
   );
