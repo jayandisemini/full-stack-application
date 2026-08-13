@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, MoreHorizontal, Minus } from 'lucide-react';
+import { Plus, MoreHorizontal, Search } from 'lucide-react';
 import TaskCard from './TaskCard';
 import { useTasks } from '../../context/TasksContext';
 import './Kanban.css';
 
-export default function Column({ column, tasks }) {
-  const { moveTask, openCreateModal } = useTasks();
+export default function Column({ column, tasks, totalCount }) {
+  const { moveTask, openCreateModal, activeFilterCount } = useTasks();
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e) => {
@@ -39,7 +39,7 @@ export default function Column({ column, tasks }) {
         <div className="column-title-group">
           <span className="column-dot" style={{ backgroundColor: column.dotColor }}></span>
           <span className="column-name">{column.title}</span>
-          <span className="column-count-pill">{tasks.length}</span>
+          <span className="column-count-pill">{totalCount || tasks.length}</span>
         </div>
         <div className="column-actions">
           <button className="col-btn" onClick={openCreateModal} title="Add Task">
@@ -58,7 +58,12 @@ export default function Column({ column, tasks }) {
         ))}
         {tasks.length === 0 && (
           <div className="empty-column-placeholder">
-            Drop tasks here
+            <div className="empty-icon-circle">
+              <Search size={22} className="empty-search-icon" />
+            </div>
+            <span className="empty-text">
+              {activeFilterCount > 0 ? 'No matches for current filters' : 'Drop tasks here'}
+            </span>
           </div>
         )}
       </div>
