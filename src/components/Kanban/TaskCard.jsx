@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, AlertTriangle, Clock } from 'lucide-react';
+import { AlertTriangle, Clock } from 'lucide-react';
 import { useTasks } from '../../context/TasksContext';
 import './Kanban.css';
 
@@ -26,9 +26,33 @@ export default function TaskCard({ task }) {
     }
   };
 
+  const getCategoryTagClass = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'design': return 'tag-design';
+      case 'frontend': return 'tag-frontend';
+      case 'backend': return 'tag-backend';
+      case 'database': return 'tag-database';
+      default: return 'tag-default';
+    }
+  };
+
+  const getCardAccentStyle = () => {
+    if (task.notice && task.notice.includes('Conflict')) {
+      return { borderLeft: '3px solid #f59e0b' };
+    }
+    if (task.priority === 'HIGH') {
+      return { borderLeft: '3px solid #f59e0b' };
+    }
+    if (task.priority === 'URGENT') {
+      return { borderLeft: '3px solid #ef4444' };
+    }
+    return { borderLeft: '3px solid #3b82f6' };
+  };
+
   return (
     <div
       className="task-card"
+      style={getCardAccentStyle()}
       draggable
       onDragStart={handleDragStart}
       onClick={() => openEditModal(task)}
@@ -61,9 +85,14 @@ export default function TaskCard({ task }) {
 
       {/* Category / Tags */}
       <div className="task-tags-row">
-        <span className="tag-pill">{task.category}</span>
+        <span className={`tag-pill ${getCategoryTagClass(task.category)}`}>
+          {task.category}
+        </span>
         {task.extraTag && (
-          <span className="tag-pill tag-extra">{task.extraTag}</span>
+          <span className="tag-pill tag-extra">
+            <AlertTriangle size={10} style={{ marginRight: 3 }} />
+            {task.extraTag}
+          </span>
         )}
       </div>
 
@@ -80,7 +109,7 @@ export default function TaskCard({ task }) {
         </div>
 
         <div className={`due-date-block ${task.isOverdue ? 'overdue-text' : ''}`}>
-          <Calendar size={13} />
+          <Clock size={12} />
           <span>{task.dueDate.replace(', 2026', '')}</span>
         </div>
       </div>

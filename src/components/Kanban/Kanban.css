@@ -326,15 +326,79 @@
   overflow: hidden;
 }
 
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-medium {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.badge-high {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.badge-urgent {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.badge-low {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
 .task-tags-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
 
+.tag-pill {
+  font-size: 0.675rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-design {
+  background: rgba(236, 72, 153, 0.18);
+  color: #f472b6;
+}
+
+.tag-frontend {
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+}
+
+.tag-backend {
+  background: rgba(6, 182, 212, 0.18);
+  color: #22d3ee;
+}
+
+.tag-database {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.tag-default {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
 .tag-extra {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  font-weight: 700;
 }
 
 .card-footer-row {
