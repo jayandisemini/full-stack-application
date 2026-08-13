@@ -3,7 +3,7 @@ import { Search, Plus, Filter, X } from 'lucide-react';
 import { useTasks } from '../../context/TasksContext';
 import './Header.css';
 
-export default function Header({ activeTab }) {
+export default function Header({ activeTab, onOpenPalette }) {
   const {
     searchQuery,
     setSearchQuery,
@@ -116,7 +116,16 @@ export default function Header({ activeTab }) {
           <button className="btn-primary create-task-btn" onClick={openCreateModal}>
             <Plus size={18} />
             <span>Create New Task</span>
-            <kbd className="kbd-shortcut">⌘K</kbd>
+            <kbd
+              className="kbd-shortcut"
+              title="Open Command Palette (⌘K)"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenPalette) onOpenPalette();
+              }}
+            >
+              ⌘K
+            </kbd>
           </button>
         </div>
       </div>

@@ -7,17 +7,19 @@ import AnalyticsView from '../../pages/AnalyticsView';
 import TeamView from '../../pages/TeamView';
 import SettingsView from '../../pages/SettingsView';
 import TaskModal from '../TaskModal';
+import CommandPalette from '../CommandPalette';
 import { useTasks } from '../../context/TasksContext';
 
 export default function AppLayout() {
   const [activeTab, setActiveTab] = useState('board');
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const { isModalOpen } = useTasks();
 
   return (
     <div className="app-container">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main-content">
-        <Header activeTab={activeTab} />
+        <Header activeTab={activeTab} onOpenPalette={() => setIsPaletteOpen(true)} />
         <div className="page-wrapper">
           {activeTab === 'board' && <BoardView />}
           {activeTab === 'list' && <ListView />}
@@ -29,6 +31,14 @@ export default function AppLayout() {
 
       {/* Task Create & Edit Modal */}
       {isModalOpen && <TaskModal />}
+
+      {/* Global Command Palette (⌘K / Ctrl+K) */}
+      <CommandPalette
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpen={isPaletteOpen}
+        setIsOpen={setIsPaletteOpen}
+      />
     </div>
   );
 }
