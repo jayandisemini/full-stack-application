@@ -257,50 +257,174 @@
   border-radius: 4px;
 }
 
-/* Team Contribution */
-.team-contribution-list {
+.analytics-header-controls {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 1rem;
 }
 
-.team-contrib-item {
+.timeframe-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--bg-column);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.tf-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tf-btn:hover {
+  color: var(--text-main);
+}
+
+.tf-btn.active {
+  background: var(--accent-purple);
+  color: #ffffff;
+}
+
+.export-report-btn {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* Sprint Health Banner */
+.sprint-health-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 0.85rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  padding: 1rem 1.35rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 12px;
 }
 
-.contrib-member {
+.health-badge-group {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  gap: 0.85rem;
 }
 
-.contrib-metrics {
+.health-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
   display: flex;
-  gap: 0.5rem;
-  font-size: 0.75rem;
+  align-items: center;
+  justify-content: center;
 }
 
-.done-tag {
-  background: rgba(16, 185, 129, 0.15);
+.health-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.health-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.health-score-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: #10b981;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.825rem;
   font-weight: 700;
 }
 
-.total-tag {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+.zap-icon {
+  color: #10b981;
+}
+
+/* Tooltip & SVG Interactive */
+.burndown-interactive-point {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.burndown-interactive-point:hover {
+  r: 8;
+  fill: #818cf8;
+}
+
+.burndown-tooltip-popup {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 20;
+  animation: fadeIn 0.15s ease;
+}
+
+.burndown-tooltip-popup strong {
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
+
+.burndown-tooltip-popup span {
+  font-size: 0.75rem;
+  color: var(--accent-purple);
+}
+
+/* Team Contribution Upgrades */
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.member-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.member-role {
+  font-size: 0.725rem;
+  color: var(--text-muted);
+}
+
+.contrib-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.contrib-progress-bg {
+  width: 90px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.contrib-progress-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
 }
 
 @media (max-width: 1024px) {
