@@ -112,7 +112,7 @@ export const INITIAL_TASKS = [
     notice: null
   },
   {
-    id: 'SYNC-109',
+    id: 'SYNC-189',
     title: 'Real-time Collaboration via WebSockets',
     description: 'Presence indicators and live cursor sharing for concurrent task editing across active team members.',
     columnId: 'inprogress',

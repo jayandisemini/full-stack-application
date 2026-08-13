@@ -20,6 +20,9 @@ export const TasksProvider = ({ children }) => {
   const [teamMembers] = useState(INITIAL_TEAM_MEMBERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [selectedAssignee, setSelectedAssignee] = useState(null);
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [previewState, setPreviewState] = useState('normal');
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -28,6 +31,30 @@ export const TasksProvider = ({ children }) => {
     setTasks(newTasks);
     localStorage.setItem('syncboard_tasks', JSON.stringify(newTasks));
   };
+
+  const toggleAssigneeFilter = (assigneeId) => {
+    setSelectedAssignee(prev => (prev === assigneeId ? null : assigneeId));
+  };
+
+  const toggleOverdueFilter = () => {
+    setOverdueOnly(prev => !prev);
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setPriorityFilter('ALL');
+    setSelectedAssignee(null);
+    setOverdueOnly(false);
+  };
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (searchQuery.trim() !== '') count++;
+    if (priorityFilter !== 'ALL') count++;
+    if (selectedAssignee !== null) count++;
+    if (overdueOnly) count++;
+    return count;
+  }, [searchQuery, priorityFilter, selectedAssignee, overdueOnly]);
 
   const moveTask = (taskId, targetColumnId) => {
     const updated = tasks.map(task => {
@@ -105,6 +132,7 @@ export const TasksProvider = ({ children }) => {
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
       const matchesSearch =
+        searchQuery.trim() === '' ||
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -113,9 +141,19 @@ export const TasksProvider = ({ children }) => {
 
       const matchesPriority = priorityFilter === 'ALL' || task.priority === priorityFilter;
 
-      return matchesSearch && matchesPriority;
+      const matchesAssignee =
+        !selectedAssignee ||
+        task.assigneeId.toLowerCase() === selectedAssignee.toLowerCase() ||
+        task.assigneeName.toLowerCase().includes(selectedAssignee.toLowerCase());
+
+      const matchesOverdue =
+        !overdueOnly ||
+        task.isOverdue ||
+        (task.notice && task.notice.includes('Overdue'));
+
+      return matchesSearch && matchesPriority && matchesAssignee && matchesOverdue;
     });
-  }, [tasks, searchQuery, priorityFilter]);
+  }, [tasks, searchQuery, priorityFilter, selectedAssignee, overdueOnly]);
 
   // Statistics calculation
   const stats = useMemo(() => {
@@ -146,6 +184,14 @@ export const TasksProvider = ({ children }) => {
         setSearchQuery,
         priorityFilter,
         setPriorityFilter,
+        selectedAssignee,
+        toggleAssigneeFilter,
+        overdueOnly,
+        toggleOverdueFilter,
+        clearAllFilters,
+        activeFilterCount,
+        previewState,
+        setPreviewState,
         moveTask,
         addTask,
         updateTask,
