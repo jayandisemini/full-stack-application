@@ -76,7 +76,11 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                   <Icon size={18} className="nav-icon" />
                   <span>{item.label}</span>
                 </div>
-                {item.badge && <span className="nav-count-badge">{item.badge}</span>}
+                {item.badge ? (
+                  <span className="nav-count-badge">{item.badge}</span>
+                ) : isActive ? (
+                  <span className="active-dot-indicator"></span>
+                ) : null}
               </button>
             );
           })}
@@ -113,7 +117,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           <div className="user-details">
             <span className="user-name">{user?.name || 'Sarah Chen'}</span>
             <div className="user-role-line">
-              <span>{user?.role || 'Frontend Lead'}</span>
+              <span>{user?.role || 'Frontend Lead'} •</span>
               <button onClick={logout} className="signout-btn" title="Sign Out">
                 Sign out
               </button>
