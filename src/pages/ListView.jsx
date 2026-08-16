@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Search,
   Download,
+  Upload,
   Calendar,
   Edit2,
   Trash2,
@@ -15,7 +16,9 @@ import {
   Filter,
   Check,
   Zap,
-  Tag
+  Tag,
+  Columns,
+  X
 } from 'lucide-react';
 import { useTasks } from '../context/TasksContext';
 import '../components/List/ListView.css';
@@ -29,13 +32,33 @@ export default function ListView() {
     updateTask,
     deleteTask,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    addTask
   } = useTasks();
 
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [dateFilter, setDateFilter] = useState('ALL'); // 'ALL', 'OVERDUE', 'TODAY', 'WEEK'
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
-  
+
+  // Column Visibility State
+  const [visibleColumns, setVisibleColumns] = useState({
+    id: true,
+    title: true,
+    status: true,
+    priority: true,
+    assignee: true,
+    dueDate: true,
+    storyPoints: true,
+    actions: true
+  });
+  const [isColMenuOpen, setIsColMenuOpen] = useState(false);
+  const colMenuRef = useRef(null);
+
+  // Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importJsonText, setImportJsonText] = useState('');
+
   // Sorting state
   const [sortField, setSortField] = useState('id'); // 'id', 'title', 'status', 'priority', 'dueDate', 'storyPoints'
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
@@ -47,14 +70,63 @@ export default function ListView() {
   // Inline Editing State
   const [activeInlineMenu, setActiveInlineMenu] = useState(null); // { taskId, type: 'status' | 'priority' }
 
-  // Filter tasks by status tab and category
+  // Close column menu on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (colMenuRef.current && !colMenuRef.current.contains(e.target)) {
+        setIsColMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  // Filter tasks by status tab, category, and date filter
   const baseFilteredTasks = useMemo(() => {
     return filteredTasks.filter(task => {
       const matchesStatus = statusFilter === 'ALL' || task.columnId === statusFilter;
       const matchesCategory = categoryFilter === 'ALL' || task.category === categoryFilter;
-      return matchesStatus && matchesCategory;
+      
+      let matchesDate = true;
+      if (dateFilter === 'OVERDUE') {
+        matchesDate = task.isOverdue || task.notice?.includes('Overdue');
+      } else if (dateFilter === 'TODAY') {
+        matchesDate = task.dueDate?.includes('Aug 16') || task.isOverdue;
+      } else if (dateFilter === 'WEEK') {
+        matchesDate = task.dueDate?.includes('Aug') || task.dueDate?.includes('Sep');
+      }
+
+      return matchesStatus && matchesCategory && matchesDate;
     });
-  }, [filteredTasks, statusFilter, categoryFilter]);
+  }, [filteredTasks, statusFilter, categoryFilter, dateFilter]);
+
+  const toggleColumnVisibility = (colKey) => {
+    setVisibleColumns(prev => ({ ...prev, [colKey]: !prev[colKey] }));
+  };
+
+  const handleImportSubmit = (e) => {
+    e.preventDefault();
+    try {
+      const parsed = JSON.parse(importJsonText);
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      items.forEach(item => {
+        addTask({
+          title: item.title || 'Imported Task',
+          description: item.description || '',
+          columnId: item.columnId || 'backlog',
+          priority: item.priority || 'MEDIUM',
+          category: item.category || 'Frontend',
+          dueDate: item.dueDate || 'Aug 30, 2026',
+          storyPoints: item.storyPoints || 5
+        });
+      });
+      alert(`Successfully imported ${items.length} task(s)!`);
+      setIsImportModalOpen(false);
+      setImportJsonText('');
+    } catch (err) {
+      alert('Invalid JSON format. Please paste a valid JSON array of tasks.');
+    }
+  };
 
   // Sort tasks
   const sortedTasks = useMemo(() => {
@@ -250,12 +322,76 @@ export default function ListView() {
               <option value="API Ready">API Ready</option>
             </select>
           </div>
+
+          {/* Date Urgency Filter */}
+          <div className="category-select-box">
+            <Calendar size={13} className="cat-icon" />
+            <select
+              value={dateFilter}
+              onChange={e => {
+                setDateFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="ALL">All Dates</option>
+              <option value="OVERDUE">Overdue Only</option>
+              <option value="TODAY">Due Today</option>
+              <option value="WEEK">Due This Week</option>
+            </select>
+          </div>
         </div>
 
-        <button onClick={exportToCSV} className="btn-secondary export-csv-btn">
-          <Download size={15} />
-          <span>Export CSV</span>
-        </button>
+        <div className="list-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Column Toggle Dropdown */}
+          <div className="inline-editable-wrapper" ref={colMenuRef}>
+            <button
+              onClick={() => setIsColMenuOpen(prev => !prev)}
+              className="btn-secondary export-csv-btn"
+              title="Configure Column Visibility"
+            >
+              <Columns size={15} />
+              <span>Columns</span>
+            </button>
+            {isColMenuOpen && (
+              <div className="inline-dropdown-menu col-toggle-menu" style={{ right: 0, left: 'auto', minWidth: '180px' }}>
+                <div className="menu-header-label" style={{ padding: '0.4rem 0.6rem', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                  TOGGLE COLUMNS
+                </div>
+                {[
+                  { key: 'id', label: 'ID' },
+                  { key: 'title', label: 'Title' },
+                  { key: 'status', label: 'Status' },
+                  { key: 'priority', label: 'Priority' },
+                  { key: 'assignee', label: 'Assignee' },
+                  { key: 'dueDate', label: 'Due Date' },
+                  { key: 'storyPoints', label: 'Points' },
+                  { key: 'actions', label: 'Actions' }
+                ].map(col => (
+                  <button
+                    key={col.key}
+                    className={`inline-item ${visibleColumns[col.key] ? 'selected' : ''}`}
+                    onClick={() => toggleColumnVisibility(col.key)}
+                  >
+                    <span>{col.label}</span>
+                    {visibleColumns[col.key] && <Check size={13} className="text-purple" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Import Tasks Button */}
+          <button onClick={() => setIsImportModalOpen(true)} className="btn-secondary export-csv-btn">
+            <Upload size={15} />
+            <span>Import JSON</span>
+          </button>
+
+          {/* Export CSV Button */}
+          <button onClick={exportToCSV} className="btn-secondary export-csv-btn">
+            <Download size={15} />
+            <span>Export CSV</span>
+          </button>
+        </div>
       </div>
 
       {/* Tasks Table Card */}
@@ -272,26 +408,38 @@ export default function ListView() {
                   )}
                 </button>
               </th>
-              <th className="sortable-th" onClick={() => handleSort('id')}>
-                <span>ID</span> {renderSortIcon('id')}
-              </th>
-              <th className="sortable-th" onClick={() => handleSort('title')}>
-                <span>TITLE</span> {renderSortIcon('title')}
-              </th>
-              <th className="sortable-th" onClick={() => handleSort('status')}>
-                <span>STATUS</span> {renderSortIcon('status')}
-              </th>
-              <th className="sortable-th" onClick={() => handleSort('priority')}>
-                <span>PRIORITY</span> {renderSortIcon('priority')}
-              </th>
-              <th>ASSIGNEE</th>
-              <th className="sortable-th" onClick={() => handleSort('dueDate')}>
-                <span>DUE DATE</span> {renderSortIcon('dueDate')}
-              </th>
-              <th className="sortable-th" onClick={() => handleSort('storyPoints')}>
-                <span>POINTS</span> {renderSortIcon('storyPoints')}
-              </th>
-              <th>ACTIONS</th>
+              {visibleColumns.id && (
+                <th className="sortable-th" onClick={() => handleSort('id')}>
+                  <span>ID</span> {renderSortIcon('id')}
+                </th>
+              )}
+              {visibleColumns.title && (
+                <th className="sortable-th" onClick={() => handleSort('title')}>
+                  <span>TITLE</span> {renderSortIcon('title')}
+                </th>
+              )}
+              {visibleColumns.status && (
+                <th className="sortable-th" onClick={() => handleSort('status')}>
+                  <span>STATUS</span> {renderSortIcon('status')}
+                </th>
+              )}
+              {visibleColumns.priority && (
+                <th className="sortable-th" onClick={() => handleSort('priority')}>
+                  <span>PRIORITY</span> {renderSortIcon('priority')}
+                </th>
+              )}
+              {visibleColumns.assignee && <th>ASSIGNEE</th>}
+              {visibleColumns.dueDate && (
+                <th className="sortable-th" onClick={() => handleSort('dueDate')}>
+                  <span>DUE DATE</span> {renderSortIcon('dueDate')}
+                </th>
+              )}
+              {visibleColumns.storyPoints && (
+                <th className="sortable-th" onClick={() => handleSort('storyPoints')}>
+                  <span>POINTS</span> {renderSortIcon('storyPoints')}
+                </th>
+              )}
+              {visibleColumns.actions && <th>ACTIONS</th>}
             </tr>
           </thead>
           <tbody>
@@ -313,107 +461,121 @@ export default function ListView() {
                       )}
                     </button>
                   </td>
-                  <td className="td-id">{task.id}</td>
-                  <td className="td-title">
-                    <div className="title-cell">
-                      <span className="title-text" onClick={() => openEditModal(task)} style={{ cursor: 'pointer' }}>
-                        {task.title}
-                      </span>
-                      <span className="tag-pill tag-small">{task.category}</span>
-                    </div>
-                  </td>
-                  <td className="td-status">
-                    <div className="inline-editable-wrapper">
-                      <button
-                        className="inline-edit-btn"
-                        onClick={() =>
-                          setActiveInlineMenu(prev =>
-                            prev?.taskId === task.id && prev?.type === 'status' ? null : { taskId: task.id, type: 'status' }
-                          )
-                        }
-                      >
-                        {getStatusBadge(task.columnId)}
-                      </button>
-                      {activeInlineMenu?.taskId === task.id && activeInlineMenu?.type === 'status' && (
-                        <div className="inline-dropdown-menu">
-                          {['backlog', 'todo', 'inprogress', 'completed'].map(col => (
-                            <button
-                              key={col}
-                              className={`inline-item ${task.columnId === col ? 'selected' : ''}`}
-                              onClick={() => {
-                                updateTask(task.id, { columnId: col });
-                                setActiveInlineMenu(null);
-                              }}
-                            >
-                              {getStatusBadge(col)}
-                              {task.columnId === col && <Check size={13} />}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="td-priority">
-                    <div className="inline-editable-wrapper">
-                      <button
-                        className="inline-edit-btn"
-                        onClick={() =>
-                          setActiveInlineMenu(prev =>
-                            prev?.taskId === task.id && prev?.type === 'priority' ? null : { taskId: task.id, type: 'priority' }
-                          )
-                        }
-                      >
-                        <span className={`badge ${getPriorityClass(task.priority)}`}>
-                          {task.priority}
+                  {visibleColumns.id && <td className="td-id">{task.id}</td>}
+                  {visibleColumns.title && (
+                    <td className="td-title">
+                      <div className="title-cell">
+                        <span className="title-text" onClick={() => openEditModal(task)} style={{ cursor: 'pointer' }}>
+                          {task.title}
                         </span>
-                      </button>
-                      {activeInlineMenu?.taskId === task.id && activeInlineMenu?.type === 'priority' && (
-                        <div className="inline-dropdown-menu">
-                          {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(prio => (
-                            <button
-                              key={prio}
-                              className={`inline-item ${task.priority === prio ? 'selected' : ''}`}
-                              onClick={() => {
-                                updateTask(task.id, { priority: prio });
-                                setActiveInlineMenu(null);
-                              }}
-                            >
-                              <span className={`badge ${getPriorityClass(prio)}`}>{prio}</span>
-                              {task.priority === prio && <Check size={13} />}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="td-assignee">
-                    <div className="assignee-cell">
-                      <div
-                        className="avatar avatar-sm"
-                        style={{ backgroundColor: assignee.color || '#6366f1' }}
-                      >
-                        {assignee.initials}
+                        <span className="tag-pill tag-small">{task.category}</span>
                       </div>
-                      <span>{task.assigneeName}</span>
-                    </div>
-                  </td>
-                  <td className="td-duedate">
-                    <div className={`duedate-cell ${task.isOverdue ? 'overdue' : ''}`}>
-                      <Calendar size={13} />
-                      <span>{task.dueDate}</span>
-                    </div>
-                  </td>
-                  <td className="td-points">
-                    <span className="points-pill">{task.storyPoints || 5} pts</span>
-                  </td>
-                  <td className="td-actions">
-                    <button onClick={() => openEditModal(task)} className="action-btn" title="Edit">
-                      <Edit2 size={14} />
-                    </button>
-                    <button onClick={() => deleteTask(task.id)} className="action-btn delete" title="Delete">
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
+                    </td>
+                  )}
+                  {visibleColumns.status && (
+                    <td className="td-status">
+                      <div className="inline-editable-wrapper">
+                        <button
+                          className="inline-edit-btn"
+                          onClick={() =>
+                            setActiveInlineMenu(prev =>
+                              prev?.taskId === task.id && prev?.type === 'status' ? null : { taskId: task.id, type: 'status' }
+                            )
+                          }
+                        >
+                          {getStatusBadge(task.columnId)}
+                        </button>
+                        {activeInlineMenu?.taskId === task.id && activeInlineMenu?.type === 'status' && (
+                          <div className="inline-dropdown-menu">
+                            {['backlog', 'todo', 'inprogress', 'completed'].map(col => (
+                              <button
+                                key={col}
+                                className={`inline-item ${task.columnId === col ? 'selected' : ''}`}
+                                onClick={() => {
+                                  updateTask(task.id, { columnId: col });
+                                  setActiveInlineMenu(null);
+                                }}
+                              >
+                                {getStatusBadge(col)}
+                                {task.columnId === col && <Check size={13} />}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                  {visibleColumns.priority && (
+                    <td className="td-priority">
+                      <div className="inline-editable-wrapper">
+                        <button
+                          className="inline-edit-btn"
+                          onClick={() =>
+                            setActiveInlineMenu(prev =>
+                              prev?.taskId === task.id && prev?.type === 'priority' ? null : { taskId: task.id, type: 'priority' }
+                            )
+                          }
+                        >
+                          <span className={`badge ${getPriorityClass(task.priority)}`}>
+                            {task.priority}
+                          </span>
+                        </button>
+                        {activeInlineMenu?.taskId === task.id && activeInlineMenu?.type === 'priority' && (
+                          <div className="inline-dropdown-menu">
+                            {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(prio => (
+                              <button
+                                key={prio}
+                                className={`inline-item ${task.priority === prio ? 'selected' : ''}`}
+                                onClick={() => {
+                                  updateTask(task.id, { priority: prio });
+                                  setActiveInlineMenu(null);
+                                }}
+                              >
+                                <span className={`badge ${getPriorityClass(prio)}`}>{prio}</span>
+                                {task.priority === prio && <Check size={13} />}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                  {visibleColumns.assignee && (
+                    <td className="td-assignee">
+                      <div className="assignee-cell">
+                        <div
+                          className="avatar avatar-sm"
+                          style={{ backgroundColor: assignee.color || '#6366f1' }}
+                        >
+                          {assignee.initials}
+                        </div>
+                        <span>{task.assigneeName}</span>
+                      </div>
+                    </td>
+                  )}
+                  {visibleColumns.dueDate && (
+                    <td className="td-duedate">
+                      <div className={`duedate-cell ${task.isOverdue ? 'overdue' : ''}`}>
+                        <Calendar size={13} />
+                        <span>{task.dueDate}</span>
+                      </div>
+                    </td>
+                  )}
+                  {visibleColumns.storyPoints && (
+                    <td className="td-points">
+                      <span className="points-pill">{task.storyPoints || 5} pts</span>
+                    </td>
+                  )}
+                  {visibleColumns.actions && (
+                    <td className="td-actions">
+                      <button onClick={() => openEditModal(task)} className="action-btn" title="Edit">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => deleteTask(task.id)} className="action-btn delete" title="Delete">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -518,6 +680,50 @@ export default function ListView() {
             <button onClick={() => setSelectedTaskIds([])} className="bulk-btn bulk-btn-cancel">
               Deselect All
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* JSON Import Modal */}
+      {isImportModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsImportModalOpen(false)}>
+          <div className="modal-card import-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h3>Import Tasks (JSON)</h3>
+              <button className="close-btn" onClick={() => setIsImportModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <form onSubmit={handleImportSubmit} className="modal-form">
+              <div className="form-group">
+                <label>PASTE TASKS JSON ARRAY</label>
+                <textarea
+                  rows={8}
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    color: 'var(--text-main)',
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem',
+                    padding: '0.75rem'
+                  }}
+                  placeholder={`[\n  {\n    "title": "New Task Title",\n    "priority": "HIGH",\n    "category": "Backend"\n  }\n]`}
+                  value={importJsonText}
+                  onChange={e => setImportJsonText(e.target.value)}
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setIsImportModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Import Tasks
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
