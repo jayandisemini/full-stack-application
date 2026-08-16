@@ -1,14 +1,34 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Plus, MoreHorizontal, Clock, CheckCircle2, Layers, UserPlus } from 'lucide-react';
+import { Search, Filter, Plus, MoreHorizontal, Clock, CheckCircle2, Layers, UserPlus, X, CheckSquare } from 'lucide-react';
 import { useTasks } from '../context/TasksContext';
 import '../components/Team/Team.css';
 
 export default function TeamView() {
-  const { teamMembers, tasks } = useTasks();
+  const { teamMembers, addTeamMember, tasks } = useTasks();
 
   const [searchMember, setSearchMember] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+
+  // Invite Form State
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Frontend Engineer');
+
+  const handleInviteSubmit = (e) => {
+    e.preventDefault();
+    if (!inviteName.trim() || !inviteEmail.trim()) return;
+    addTeamMember({
+      name: inviteName,
+      email: inviteEmail,
+      role: inviteRole
+    });
+    alert(`Successfully added ${inviteName} to the team!`);
+    setInviteName('');
+    setInviteEmail('');
+    setInviteModalOpen(false);
+  };
 
   // Filter members by search & role
   const filteredMembers = useMemo(() => {
@@ -16,7 +36,7 @@ export default function TeamView() {
       const matchesSearch =
         member.name.toLowerCase().includes(searchMember.toLowerCase()) ||
         member.role.toLowerCase().includes(searchMember.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchMember.toLowerCase());
+        (member.email && member.email.toLowerCase().includes(searchMember.toLowerCase()));
       
       const matchesRole = roleFilter === 'ALL' || member.role === roleFilter;
 
@@ -81,7 +101,7 @@ export default function TeamView() {
       {/* 4x2 Grid of Member Cards */}
       <div className="team-grid">
         {filteredMembers.map(member => {
-          const memberTasks = tasks.filter(t => t.assigneeId === member.id);
+          const memberTasks = tasks.filter(t => t.assigneeId === member.id || t.assigneeName === member.name);
           const activeTasks = memberTasks.filter(t => t.columnId === 'inprogress' || t.columnId === 'todo').length;
           const completedTasks = memberTasks.filter(t => t.columnId === 'completed').length;
           const totalTasks = memberTasks.length || member.activeTasksCount || 1;
@@ -89,10 +109,15 @@ export default function TeamView() {
           const isOnline = member.status === 'online';
 
           return (
-            <div key={member.id} className="member-card glass-panel">
+            <div
+              key={member.id}
+              className="member-card glass-panel"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSelectedMember(member)}
+            >
               {/* Card Top Action */}
               <div className="card-top-action">
-                <button className="more-btn" title="Options">
+                <button className="more-btn" title="View Assigned Tasks">
                   <MoreHorizontal size={16} />
                 </button>
               </div>
@@ -162,20 +187,36 @@ export default function TeamView() {
           <div className="modal-card invite-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Invite New Team Member</h3>
-              <button className="close-btn" onClick={() => setInviteModalOpen(false)}>✕</button>
+              <button className="close-btn" onClick={() => setInviteModalOpen(false)}>
+                <X size={16} />
+              </button>
             </div>
-            <div className="modal-form">
+            <form onSubmit={handleInviteSubmit} className="modal-form">
               <div className="form-group">
                 <label>FULL NAME</label>
-                <input type="text" placeholder="e.g. David Vance" required autoFocus />
+                <input
+                  type="text"
+                  placeholder="e.g. David Vance"
+                  value={inviteName}
+                  onChange={e => setInviteName(e.target.value)}
+                  required
+                  autoFocus
+                />
               </div>
               <div className="form-group">
                 <label>EMAIL ADDRESS</label>
-                <input type="email" placeholder="e.g. david.vance@syncboard.dev" required />
+                <input
+                  type="email"
+                  placeholder="e.g. david.vance@syncboard.dev"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  required
+                />
               </div>
               <div className="form-group">
                 <label>ROLE / TITLE</label>
-                <select>
+                <select value={inviteRole} onChange={e => setInviteRole(e.target.value)}>
+                  <option value="Frontend Engineer">Frontend Engineer</option>
                   <option value="Frontend Lead">Frontend Lead</option>
                   <option value="Backend Engineer">Backend Engineer</option>
                   <option value="Designer">UI/UX Designer</option>
@@ -184,18 +225,71 @@ export default function TeamView() {
                 </select>
               </div>
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setInviteModalOpen(false)}>Cancel</button>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => {
-                    alert('Invitation sent successfully!');
-                    setInviteModalOpen(false);
-                  }}
-                >
+                <button type="button" className="btn-secondary" onClick={() => setInviteModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
                   Send Invitation
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Member Tasks Detail Modal */}
+      {selectedMember && (
+        <div className="modal-overlay" onClick={() => setSelectedMember(null)}>
+          <div className="modal-card member-tasks-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '550px' }}>
+            <div className="modal-header" style={{ alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div
+                  className="avatar avatar-sm"
+                  style={{ backgroundColor: selectedMember.color || '#6366f1', width: 32, height: 32, fontSize: '0.85rem' }}
+                >
+                  {selectedMember.initials}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{selectedMember.name}</h3>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{selectedMember.role}</span>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setSelectedMember(null)}>
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto' }}>
+              <h4 style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                ASSIGNED TASKS ({tasks.filter(t => t.assigneeId === selectedMember.id || t.assigneeName === selectedMember.name).length})
+              </h4>
+              {tasks.filter(t => t.assigneeId === selectedMember.id || t.assigneeName === selectedMember.name).map(t => (
+                <div
+                  key={t.id}
+                  style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-purple)' }}>{t.id}</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{t.title}</div>
+                  </div>
+                  <span className={`status-pill status-${t.columnId}`}>
+                    {t.columnId.toUpperCase()}
+                  </span>
+                </div>
+              ))}
+              {tasks.filter(t => t.assigneeId === selectedMember.id || t.assigneeName === selectedMember.name).length === 0 && (
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                  No tasks currently assigned to this member.
+                </div>
+              )}
             </div>
           </div>
         </div>

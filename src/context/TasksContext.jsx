@@ -17,7 +17,33 @@ export const TasksProvider = ({ children }) => {
     return INITIAL_TASKS;
   });
 
-  const [teamMembers] = useState(INITIAL_TEAM_MEMBERS);
+  const [teamMembers, setTeamMembers] = useState(() => {
+    const saved = localStorage.getItem('syncboard_team_members');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return INITIAL_TEAM_MEMBERS;
+  });
+
+  const addTeamMember = (newMember) => {
+    const nextId = `user-${Date.now()}`;
+    const initials = newMember.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'TM';
+    const memberObj = {
+      id: nextId,
+      name: newMember.name,
+      email: newMember.email,
+      role: newMember.role || 'Software Engineer',
+      initials,
+      color: '#8b5cf6',
+      status: 'online',
+      activeTasksCount: 0
+    };
+    const updated = [memberObj, ...teamMembers];
+    setTeamMembers(updated);
+    localStorage.setItem('syncboard_team_members', JSON.stringify(updated));
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedAssignee, setSelectedAssignee] = useState(null);
@@ -183,6 +209,7 @@ export const TasksProvider = ({ children }) => {
         tasks,
         filteredTasks,
         teamMembers,
+        addTeamMember,
         searchQuery,
         setSearchQuery,
         priorityFilter,
