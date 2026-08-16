@@ -22,18 +22,24 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const saved = localStorage.getItem('syncboard_logged_in');
+    return saved === null ? true : saved === 'true';
+  });
 
   const login = (email, password) => {
+    const namePart = email.split('@')[0];
+    const nameFormatted = namePart.replace(/[._-]/g, ' ').replace(/\b\w/g, str => str.toUpperCase());
     const newUser = {
-      name: email.split('@')[0].replace('.', ' ').replace(/^./, str => str.toUpperCase()),
+      name: nameFormatted || 'Sarah Chen',
       email,
-      role: 'Engineering Team',
-      initials: email.substring(0, 2).toUpperCase()
+      role: 'Engineering Lead',
+      initials: (namePart.substring(0, 2) || 'SC').toUpperCase()
     };
     setUser(newUser);
     setIsAuthenticated(true);
     localStorage.setItem('syncboard_user', JSON.stringify(newUser));
+    localStorage.setItem('syncboard_logged_in', 'true');
   };
 
   const register = (fullName, email, role) => {
@@ -42,15 +48,17 @@ export const AuthProvider = ({ children }) => {
       .map(n => n[0])
       .join('')
       .substring(0, 2)
-      .toUpperCase();
-    const newUser = { name: fullName, email, role, initials };
+      .toUpperCase() || 'SC';
+    const newUser = { name: fullName, email, role: role || 'Software Engineer', initials };
     setUser(newUser);
     setIsAuthenticated(true);
     localStorage.setItem('syncboard_user', JSON.stringify(newUser));
+    localStorage.setItem('syncboard_logged_in', 'true');
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    localStorage.setItem('syncboard_logged_in', 'false');
   };
 
   return (
