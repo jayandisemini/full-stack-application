@@ -561,6 +561,87 @@
   font-weight: 700;
 }
 
+.wip-limit-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-left: 0.2rem;
+}
+
+.wip-limit-badge.exceeded {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.column-count-pill.wip-alert {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.kanban-column.wip-exceeded {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.task-card {
+  position: relative;
+}
+
+.card-quick-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.task-card:hover .card-quick-actions {
+  opacity: 1;
+}
+
+.quick-act-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: none;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+.quick-act-btn:hover {
+  transform: scale(1.1);
+}
+
+.quick-act-btn.next:hover {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.quick-act-btn.delete:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.tag-subtask-count {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
 @media (max-width: 1200px) {
   .kanban-grid {
     grid-template-columns: repeat(2, 1fr);

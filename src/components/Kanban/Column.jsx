@@ -89,13 +89,22 @@ export default function Column({ column, tasks, totalCount }) {
     return 0;
   });
 
+  const wipLimits = {
+    backlog: 10,
+    todo: 6,
+    inprogress: 4,
+    completed: 10
+  };
+  const wipLimit = wipLimits[column.id] || 8;
+  const isWipExceeded = totalCount > wipLimit;
+
   if (isCollapsed) {
     return (
       <div className="kanban-column collapsed" onClick={() => setIsCollapsed(false)}>
         <div className="collapsed-content">
           <span className="column-dot" style={{ backgroundColor: column.dotColor }}></span>
           <span className="collapsed-title">{column.title}</span>
-          <span className="column-count-pill">{totalCount || tasks.length}</span>
+          <span className={`column-count-pill ${isWipExceeded ? 'wip-alert' : ''}`}>{totalCount || tasks.length}</span>
           <Maximize2 size={14} className="expand-icon" title="Expand Column" />
         </div>
       </div>
@@ -104,7 +113,7 @@ export default function Column({ column, tasks, totalCount }) {
 
   return (
     <div
-      className={`kanban-column ${isDragOver ? 'drag-over' : ''}`}
+      className={`kanban-column ${isDragOver ? 'drag-over' : ''} ${isWipExceeded ? 'wip-exceeded' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -114,7 +123,12 @@ export default function Column({ column, tasks, totalCount }) {
         <div className="column-title-group">
           <span className="column-dot" style={{ backgroundColor: column.dotColor }}></span>
           <span className="column-name">{column.title}</span>
-          <span className="column-count-pill">{totalCount || tasks.length}</span>
+          <span className={`column-count-pill ${isWipExceeded ? 'wip-alert' : ''}`}>
+            {totalCount || tasks.length}
+          </span>
+          <span className={`wip-limit-badge ${isWipExceeded ? 'exceeded' : ''}`} title={`WIP Limit: ${wipLimit}`}>
+            WIP {totalCount}/{wipLimit}
+          </span>
         </div>
 
         <div className="column-actions" ref={menuRef}>
