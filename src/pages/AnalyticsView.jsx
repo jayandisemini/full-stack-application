@@ -1,9 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { Printer, Calendar, Download, Info } from 'lucide-react';
 import { useTasks } from '../context/TasksContext';
 import '../components/Analytics/Analytics.css';
 
 export default function AnalyticsView() {
   const { tasks, stats, teamMembers } = useTasks();
+  const [selectedSprint, setSelectedSprint] = useState('q3'); // 'q3', 's1', 's2'
+  const [activeTooltip, setActiveTooltip] = useState(null); // { x, y, label, val }
+
+  const sprintMultiplier = selectedSprint === 's1' ? 0.7 : selectedSprint === 's2' ? 0.9 : 1.0;
+
+  const handlePrintReport = () => {
+    window.print();
+  };
 
   // Dynamic Column Counts
   const colCounts = useMemo(() => {
@@ -76,11 +85,32 @@ export default function AnalyticsView() {
       <div className="analytics-header">
         <div>
           <h2>Analytics &amp; Reports</h2>
-          <p className="analytics-sub">Q3 Sprint Board • Main Sprint • Week 6 of 8</p>
+          <p className="analytics-sub">
+            {selectedSprint === 'q3' && 'Q3 Sprint Board • Main Sprint • Week 6 of 8'}
+            {selectedSprint === 's1' && 'Sprint 1 • Foundations & Architecture • Completed'}
+            {selectedSprint === 's2' && 'Sprint 2 • Core Engine & Workflow • Completed'}
+          </p>
         </div>
-        <div className="live-status-pill">
-          <span className="green-dot-pulse"></span>
-          <span>Live data • Updated just now</span>
+        <div className="analytics-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Sprint Selector */}
+          <div className="category-select-box" style={{ background: 'var(--bg-card)' }}>
+            <Calendar size={13} className="cat-icon" />
+            <select value={selectedSprint} onChange={e => setSelectedSprint(e.target.value)}>
+              <option value="q3">Q3 Main Sprint (Active)</option>
+              <option value="s2">Sprint 2 (Historical)</option>
+              <option value="s1">Sprint 1 (Historical)</option>
+            </select>
+          </div>
+
+          <button onClick={handlePrintReport} className="btn-secondary export-csv-btn">
+            <Printer size={15} />
+            <span>Print Report</span>
+          </button>
+
+          <div className="live-status-pill">
+            <span className="green-dot-pulse"></span>
+            <span>Live data</span>
+          </div>
         </div>
       </div>
 
@@ -93,7 +123,7 @@ export default function AnalyticsView() {
             <span className="kpi-dot blue"></span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-number">{tasks.length || 15}</span>
+            <span className="kpi-number">{Math.round((tasks.length || 15) * sprintMultiplier)}</span>
           </div>
           <span className="kpi-subtext">Across all columns</span>
         </div>
@@ -105,7 +135,7 @@ export default function AnalyticsView() {
             <span className="kpi-dot green"></span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-number">{stats.completionRate || 27}%</span>
+            <span className="kpi-number">{Math.round((stats.completionRate || 27) * (selectedSprint === 's1' ? 1.4 : 1))} %</span>
           </div>
           <div className="kpi-sub-row">
             <span className="kpi-sub-detail">{colCounts.completed} of {tasks.length || 15} done</span>
@@ -120,7 +150,7 @@ export default function AnalyticsView() {
             <span className="kpi-dot purple"></span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-number">{stats.velocityPoints || 34} pts</span>
+            <span className="kpi-number">{Math.round((stats.velocityPoints || 34) * sprintMultiplier)} pts</span>
           </div>
           <div className="kpi-sub-row">
             <span className="kpi-sub-detail">Story points delivered</span>
@@ -135,7 +165,7 @@ export default function AnalyticsView() {
             <span className="kpi-dot red"></span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-number">{stats.overdueCount || 1}</span>
+            <span className="kpi-number">{selectedSprint === 's1' ? 0 : stats.overdueCount || 1}</span>
           </div>
           <div className="kpi-sub-row">
             <span className="kpi-sub-detail">Need immediate attention</span>
@@ -147,11 +177,11 @@ export default function AnalyticsView() {
       {/* 3. Middle Section: Burndown & Task Distribution Charts */}
       <div className="charts-grid">
         {/* Sprint Burndown Line Chart */}
-        <div className="chart-card glass-panel burndown-card">
+        <div className="chart-card glass-panel burndown-card" style={{ position: 'relative' }}>
           <div className="chart-header">
             <div>
               <h3>Sprint Burndown Chart</h3>
-              <p className="chart-sub">Ideal vs. actual remaining work - Q3 Sprint</p>
+              <p className="chart-sub">Ideal vs. actual remaining work (Points)</p>
             </div>
             <div className="chart-legend">
               <span className="legend-item"><span className="line-sample ideal"></span> Ideal</span>
@@ -159,7 +189,7 @@ export default function AnalyticsView() {
             </div>
           </div>
 
-          <div className="chart-body">
+          <div className="chart-body" style={{ position: 'relative' }}>
             <svg viewBox="0 0 500 200" className="burndown-svg">
               {/* Y Axis Grid Lines */}
               <line x1="40" y1="20" x2="480" y2="20" stroke="rgba(255,255,255,0.06)" />
@@ -192,9 +222,27 @@ export default function AnalyticsView() {
                 strokeWidth="3"
               />
 
-              {/* Actual Points */}
-              {[[50, 40], [120, 58], [190, 76], [260, 94], [330, 120], [470, 145]].map(([cx, cy], idx) => (
-                <circle key={idx} cx={cx} cy={cy} r="4" fill="#6366f1" stroke="#ffffff" strokeWidth="2" />
+              {/* Actual Points with Hover Tooltips */}
+              {[
+                { cx: 50, cy: 40, label: 'Week 1', val: '55 pts remaining' },
+                { cx: 120, cy: 58, label: 'Week 2', val: '48 pts remaining' },
+                { cx: 190, cy: 76, label: 'Week 3', val: '41 pts remaining' },
+                { cx: 260, cy: 94, label: 'Week 4', val: '33 pts remaining' },
+                { cx: 330, cy: 120, label: 'Week 5', val: '24 pts remaining' },
+                { cx: 470, cy: 145, label: 'Current', val: '14 pts remaining' }
+              ].map((pt, idx) => (
+                <circle
+                  key={idx}
+                  cx={pt.cx}
+                  cy={pt.cy}
+                  r="6"
+                  fill="#6366f1"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setActiveTooltip(pt)}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                />
               ))}
 
               {/* X Axis Labels */}
@@ -205,6 +253,30 @@ export default function AnalyticsView() {
               <text x="325" y="196" fill="#64748b" fontSize="10">Week 5</text>
               <text x="455" y="196" fill="#64748b" fontSize="10">Now</text>
             </svg>
+
+            {/* Hover Tooltip Overlay */}
+            {activeTooltip && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${(activeTooltip.cx / 500) * 100}%`,
+                  top: `${(activeTooltip.cy / 200) * 100 - 15}%`,
+                  transform: 'translate(-50%, -100%)',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                  borderRadius: '6px',
+                  padding: '0.35rem 0.6rem',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-main)',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                  zIndex: 10
+                }}
+              >
+                <strong>{activeTooltip.label}</strong>: {activeTooltip.val}
+              </div>
+            )}
           </div>
         </div>
 
