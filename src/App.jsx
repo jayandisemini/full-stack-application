@@ -1,4 +1,5 @@
 import React from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TasksProvider } from './context/TasksContext';
@@ -11,13 +12,17 @@ function MainAppContent() {
 }
 
 export default function App() {
+  const googleClientId = "123456789-example.apps.googleusercontent.com";
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <TasksProvider>
-          <MainAppContent />
-        </TasksProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <ThemeProvider>
+        <AuthProvider>
+          <TasksProvider>
+            <MainAppContent />
+          </TasksProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }
