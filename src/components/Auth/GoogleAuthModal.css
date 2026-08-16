@@ -1,0 +1,203 @@
+.google-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 1.5rem;
+  animation: backdropFade 0.2s ease forwards;
+}
+
+.google-modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 1.5rem;
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.google-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.google-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.google-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.google-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.google-modal-body h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 0.2rem;
+}
+
+.google-subtext {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin-bottom: 1.25rem;
+}
+
+.google-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.google-account-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.google-account-item:hover {
+  background: rgba(66, 133, 244, 0.12);
+  border-color: rgba(66, 133, 244, 0.4);
+  transform: translateY(-1px);
+}
+
+.google-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.google-account-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.google-acc-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.google-acc-email {
+  font-size: 0.775rem;
+  color: #94a3b8;
+}
+
+.google-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.25rem 0 1rem;
+}
+
+.google-divider::before,
+.google-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.google-divider span {
+  padding: 0 0.75rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.google-custom-form {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.google-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.google-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+}
+
+.google-input-wrapper input {
+  width: 100%;
+  padding: 0.6rem 0.75rem 0.6rem 2.2rem;
+  background: #121929;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.85rem;
+}
+
+.google-input-wrapper input:focus {
+  outline: none;
+  border-color: #4285F4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
+}
+
+.google-submit-btn {
+  background: #4285F4;
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.google-submit-btn:hover {
+  background: #3367d6;
+}

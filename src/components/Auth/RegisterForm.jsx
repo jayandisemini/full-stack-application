@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Briefcase, Eye, EyeOff, Github } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import GoogleAuthModal from './GoogleAuthModal';
 import './AuthForm.css';
 
 export default function RegisterForm() {
@@ -11,6 +12,7 @@ export default function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('••••••••');
   const [role, setRole] = useState('Frontend Lead');
   const [showPassword, setShowPassword] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,103 +20,109 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="auth-card glass-panel">
-      {/* Top indicator bar */}
-      <div className="card-top-bar"></div>
+    <>
+      <GoogleAuthModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+      />
 
-      <div className="auth-card-body">
-        <div className="auth-header">
-          <h2>Create account</h2>
-          <p>Join your team on SyncBoard</p>
-        </div>
+      <div className="auth-card glass-panel">
+        {/* Top indicator bar */}
+        <div className="card-top-bar"></div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          {/* Full Name */}
-          <div className="form-group">
-            <label>FULL NAME</label>
-            <div className="input-wrapper">
-              <User size={18} className="input-icon" />
-              <input
-                type="text"
-                placeholder="e.g. Sarah Chen"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                required
-              />
-            </div>
+        <div className="auth-card-body">
+          <div className="auth-header">
+            <h2>Create account</h2>
+            <p>Join your team on SyncBoard</p>
           </div>
 
-          {/* Work Email */}
-          <div className="form-group">
-            <label>WORK EMAIL</label>
-            <div className="input-wrapper">
-              <Mail size={18} className="input-icon" />
-              <input
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Password & Confirm Side-by-Side */}
-          <div className="form-row-2">
+          <form onSubmit={handleSubmit} className="auth-form">
+            {/* Full Name */}
             <div className="form-group">
-              <label>PASSWORD</label>
+              <label>FULL NAME</label>
               <div className="input-wrapper">
+                <User size={18} className="input-icon" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Min 8 chars"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>CONFIRM</label>
-              <div className="input-wrapper">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Repeat"
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  type="text"
+                  placeholder="e.g. Sarah Chen"
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
                   required
                 />
               </div>
             </div>
-          </div>
 
-          {/* Role Selection */}
-          <div className="form-group">
-            <label>ROLE</label>
-            <div className="input-wrapper">
-              <Briefcase size={18} className="input-icon" />
-              <input
-                type="text"
-                placeholder="Frontend Lead"
-                value={role}
-                onChange={e => setRole(e.target.value)}
-                required
-              />
+            {/* Work Email */}
+            <div className="form-group">
+              <label>WORK EMAIL</label>
+              <div className="input-wrapper">
+                <Mail size={18} className="input-icon" />
+                <input
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <button type="submit" className="btn-primary auth-submit-btn">
-            Create Account &amp; Join Team
-          </button>
-        </form>
+            {/* Password & Confirm Side-by-Side */}
+            <div className="form-row-2">
+              <div className="form-group">
+                <label>PASSWORD</label>
+                <div className="input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min 8 chars"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>CONFIRM</label>
+                <div className="input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Repeat"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Role Selection */}
+            <div className="form-group">
+              <label>ROLE</label>
+              <div className="input-wrapper">
+                <Briefcase size={18} className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Frontend Lead"
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button type="submit" className="btn-primary auth-submit-btn">
+              Create Account &amp; Join Team
+            </button>
+          </form>
 
           {/* Terms Disclaimer */}
           <div className="terms-disclaimer">
@@ -134,7 +142,7 @@ export default function RegisterForm() {
               <Github size={18} />
               <span>GitHub</span>
             </button>
-            <button type="button" onClick={() => register('Google User', 'google.user@syncboard.io', 'Product Lead')} className="social-btn">
+            <button type="button" onClick={() => setIsGoogleModalOpen(true)} className="social-btn">
               <svg size={18} width="18" height="18" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -166,5 +174,6 @@ export default function RegisterForm() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }
