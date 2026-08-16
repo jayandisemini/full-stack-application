@@ -2,6 +2,9 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import mongoose from 'mongoose';
+import Task from './models/Task.js';
+import Member from './models/Member.js';
 
 const app = express();
 app.use(cors());
@@ -15,8 +18,46 @@ const io = new Server(server, {
   }
 });
 
-// Initial Seed Data
-let teamMembers = [
+// MongoDB Connection Setup with Graceful Fallback
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/syncboard';
+let isMongoConnected = false;
+
+mongoose
+  .connect(MONGODB_URI, { serverSelectionTimeoutMS: 3000 })
+  .then(async () => {
+    isMongoConnected = true;
+    console.log('====================================================');
+    console.log('🍃 MongoDB Database Connected Successfully!');
+    console.log('====================================================');
+    await seedMongoDB();
+  })
+  .catch((err) => {
+    console.warn('====================================================');
+    console.warn('⚠️ Local MongoDB Service Offline. Operating in In-Memory / API State Mode.');
+    console.warn('====================================================');
+  });
+
+// Seed Default Data to MongoDB if collections are empty
+async function seedMongoDB() {
+  try {
+    const taskCount = await Task.countDocuments();
+    if (taskCount === 0) {
+      await Task.insertMany(initialTasks);
+      console.log('[MongoDB] Seeded initial task records');
+    }
+
+    const memberCount = await Member.countDocuments();
+    if (memberCount === 0) {
+      await Member.insertMany(initialMembers);
+      console.log('[MongoDB] Seeded initial member records');
+    }
+  } catch (err) {
+    console.error('[MongoDB] Seeding error:', err.message);
+  }
+}
+
+// Initial In-Memory Fallback Seed Data
+let initialMembers = [
   { id: 'user-1', name: 'Alex Rivers', email: 'alex.rivers@syncboard.io', role: 'Frontend Lead', initials: 'AR', color: '#6366f1', status: 'online', activeTasksCount: 3 },
   { id: 'user-2', name: 'Sarah Chen', email: 'sarah.chen@syncboard.io', role: 'Backend Engineer', initials: 'SC', color: '#10b981', status: 'online', activeTasksCount: 4 },
   { id: 'user-3', name: 'Marcus Vance', email: 'marcus.vance@syncboard.io', role: 'API Engineer', initials: 'MV', color: '#a855f7', status: 'online', activeTasksCount: 2 },
@@ -24,7 +65,7 @@ let teamMembers = [
   { id: 'user-5', name: 'David Kim', email: 'david.kim@syncboard.io', role: 'DevOps Lead', initials: 'DK', color: '#f59e0b', status: 'online', activeTasksCount: 2 }
 ];
 
-let tasks = [
+let initialTasks = [
   {
     id: 'SYNC-101',
     title: 'Migrate Auth to OAuth2 & JWT Refresh Tokens',
@@ -83,24 +124,40 @@ let tasks = [
   }
 ];
 
+let memoryTasks = [...initialTasks];
+let memoryMembers = [...initialMembers];
+
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'SyncBoard Backend API', timestamp: new Date() });
+  res.json({
+    status: 'ok',
+    service: 'SyncBoard Backend API',
+    database: isMongoConnected ? 'MongoDB Connected' : 'In-Memory State',
+    timestamp: new Date()
+  });
 });
 
 // REST API: Tasks
-app.get('/api/tasks', (req, res) => {
-  res.json(tasks);
+app.get('/api/tasks', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const dbTasks = await Task.find().sort({ createdAt: -1 });
+      return res.json(dbTasks);
+    } catch (e) {}
+  }
+  res.json(memoryTasks);
 });
 
-app.post('/api/tasks', (req, res) => {
+app.post('/api/tasks', async (req, res) => {
   const newTaskData = req.body;
-  const nextIdNumber = tasks.reduce((max, t) => {
+  const currentList = isMongoConnected ? await Task.find() : memoryTasks;
+  const nextIdNumber = currentList.reduce((max, t) => {
     const num = parseInt(t.id.replace('SYNC-', ''), 10);
     return isNaN(num) ? max : Math.max(max, num);
   }, 100) + 1;
 
-  const assignee = teamMembers.find(m => m.id === newTaskData.assigneeId) || teamMembers[0];
+  const membersList = isMongoConnected ? await Member.find() : memoryMembers;
+  const assignee = membersList.find(m => m.id === newTaskData.assigneeId) || membersList[0] || memoryMembers[0];
 
   const newTask = {
     id: `SYNC-${nextIdNumber}`,
@@ -117,28 +174,37 @@ app.post('/api/tasks', (req, res) => {
     notice: null
   };
 
-  tasks.unshift(newTask);
+  if (isMongoConnected) {
+    try {
+      const created = await Task.create(newTask);
+      io.emit('task_created', created);
+      return res.status(201).json(created);
+    } catch (e) {}
+  }
+
+  memoryTasks.unshift(newTask);
   io.emit('task_created', newTask);
   res.status(201).json(newTask);
 });
 
-app.put('/api/tasks/:id', (req, res) => {
+app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const updatedFields = req.body;
-  
-  let targetTask = null;
-  tasks = tasks.map(t => {
-    if (t.id === id) {
-      const assignee = updatedFields.assigneeId
-        ? teamMembers.find(m => m.id === updatedFields.assigneeId) || { id: t.assigneeId, name: t.assigneeName }
-        : { id: t.assigneeId, name: t.assigneeName };
 
-      targetTask = {
-        ...t,
-        ...updatedFields,
-        assigneeId: assignee.id,
-        assigneeName: assignee.name
-      };
+  if (isMongoConnected) {
+    try {
+      const updated = await Task.findOneAndUpdate({ id }, updatedFields, { new: true });
+      if (updated) {
+        io.emit('task_updated', updated);
+        return res.json(updated);
+      }
+    } catch (e) {}
+  }
+
+  let targetTask = null;
+  memoryTasks = memoryTasks.map(t => {
+    if (t.id === id) {
+      targetTask = { ...t, ...updatedFields };
       return targetTask;
     }
     return t;
@@ -152,19 +218,30 @@ app.put('/api/tasks/:id', (req, res) => {
   }
 });
 
-app.delete('/api/tasks/:id', (req, res) => {
+app.delete('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
-  tasks = tasks.filter(t => t.id !== id);
+  if (isMongoConnected) {
+    try {
+      await Task.findOneAndDelete({ id });
+    } catch (e) {}
+  }
+  memoryTasks = memoryTasks.filter(t => t.id !== id);
   io.emit('task_deleted', { id });
   res.json({ success: true, id });
 });
 
 // REST API: Team Members
-app.get('/api/members', (req, res) => {
-  res.json(teamMembers);
+app.get('/api/members', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const dbMembers = await Member.find().sort({ createdAt: -1 });
+      return res.json(dbMembers);
+    } catch (e) {}
+  }
+  res.json(memoryMembers);
 });
 
-app.post('/api/members', (req, res) => {
+app.post('/api/members', async (req, res) => {
   const newMemberData = req.body;
   const nextId = `user-${Date.now()}`;
   const initials = newMemberData.name
@@ -182,7 +259,15 @@ app.post('/api/members', (req, res) => {
     activeTasksCount: 0
   };
 
-  teamMembers.unshift(memberObj);
+  if (isMongoConnected) {
+    try {
+      const created = await Member.create(memberObj);
+      io.emit('member_created', created);
+      return res.status(201).json(created);
+    } catch (e) {}
+  }
+
+  memoryMembers.unshift(memberObj);
   io.emit('member_created', memberObj);
   res.status(201).json(memberObj);
 });
@@ -191,9 +276,19 @@ app.post('/api/members', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`[Socket.io] Client connected: ${socket.id}`);
 
-  socket.on('move_task', ({ taskId, targetColumnId }) => {
+  socket.on('move_task', async ({ taskId, targetColumnId }) => {
+    if (isMongoConnected) {
+      try {
+        const updated = await Task.findOneAndUpdate({ id: taskId }, { columnId: targetColumnId }, { new: true });
+        if (updated) {
+          socket.broadcast.emit('task_moved', updated);
+          return;
+        }
+      } catch (e) {}
+    }
+
     let movedTask = null;
-    tasks = tasks.map(t => {
+    memoryTasks = memoryTasks.map(t => {
       if (t.id === taskId) {
         movedTask = { ...t, columnId: targetColumnId };
         return movedTask;
@@ -215,6 +310,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 SyncBoard Backend Server running on http://localhost:${PORT}`);
+  console.log(`⚡ MongoDB Mongoose ORM Connected & Ready`);
   console.log(`⚡ WebSockets listening for live real-time synchronization`);
   console.log(`====================================================`);
 });
