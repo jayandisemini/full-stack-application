@@ -71,25 +71,65 @@
   gap: 1.15rem;
 }
 
-.modal-form select {
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
   width: 100%;
-  background: var(--bg-input);
+  background: var(--bg-input) !important;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.65rem 0.85rem;
   font-size: 0.875rem;
-  color: var(--text-main);
+  color: var(--text-main) !important;
+  transition: all 0.2s ease;
 }
 
 .modal-form textarea {
-  width: 100%;
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.875rem;
-  color: var(--text-main);
   resize: vertical;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  background: rgba(18, 25, 41, 0.95) !important;
+}
+
+.modal-form input::placeholder,
+.modal-form textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.modal-form input:-webkit-autofill,
+.modal-form input:-webkit-autofill:hover,
+.modal-form input:-webkit-autofill:focus,
+.modal-form textarea:-webkit-autofill,
+.modal-form select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text-main) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #121929 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .modal-actions {
