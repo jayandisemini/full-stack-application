@@ -1,0 +1,16 @@
+{
+  "name": "syncboard-backend",
+  "version": "1.0.0",
+  "description": "Node.js Express & Socket.io REST API and Real-Time WebSocket Server for SyncBoard",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
