@@ -5,6 +5,10 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import Task from './models/Task.js';
 import Member from './models/Member.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'syncboard_super_secret_key_123';
 
 const app = express();
 app.use(cors());
@@ -135,6 +139,84 @@ app.get('/api/health', (req, res) => {
     database: isMongoConnected ? 'MongoDB Connected' : 'In-Memory State',
     timestamp: new Date()
   });
+});
+
+// REST API: Auth
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { fullName, email, password, role } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+
+    let existingUser = null;
+    if (isMongoConnected) {
+      existingUser = await Member.findOne({ email });
+    } else {
+      existingUser = memoryMembers.find(m => m.email === email);
+    }
+    
+    if (existingUser) return res.status(400).json({ error: 'Email already exists' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'US';
+    const nextId = `user-${Date.now()}`;
+    
+    const newUserObj = {
+      id: nextId,
+      name: fullName || 'User',
+      email,
+      password: hashedPassword,
+      role: role || 'Software Engineer',
+      initials,
+      color: '#3b82f6',
+      status: 'online',
+      activeTasksCount: 0
+    };
+
+    let savedUser = newUserObj;
+    if (isMongoConnected) {
+      savedUser = await Member.create(newUserObj);
+    } else {
+      memoryMembers.unshift(newUserObj);
+    }
+
+    const token = jwt.sign({ id: savedUser.id, email: savedUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.status(201).json({
+      token,
+      user: { id: savedUser.id, name: savedUser.name, email: savedUser.email, role: savedUser.role, initials: savedUser.initials }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error during registration' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    let user = null;
+    
+    if (isMongoConnected) {
+      user = await Member.findOne({ email });
+    } else {
+      user = memoryMembers.find(m => m.email === email);
+    }
+
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    if (user.password) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, initials: user.initials }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error during login' });
+  }
 });
 
 // REST API: Tasks
