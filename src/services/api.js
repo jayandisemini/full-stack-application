@@ -9,6 +9,37 @@ export const socket = io(SOCKET_URL, {
 });
 
 export const apiService = {
+  // Auth API
+  async login(email, password) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) throw new Error('Login failed');
+      return await res.json();
+    } catch (err) {
+      console.warn('[API Service] Login failed:', err.message);
+      return null;
+    }
+  },
+
+  async register(fullName, email, password, role) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, password, role })
+      });
+      if (!res.ok) throw new Error('Registration failed');
+      return await res.json();
+    } catch (err) {
+      console.warn('[API Service] Registration failed:', err.message);
+      return null;
+    }
+  },
+
   // Fetch All Tasks
   async getTasks() {
     try {

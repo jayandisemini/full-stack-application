@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { apiService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -27,33 +28,56 @@ export const AuthProvider = ({ children }) => {
     return saved === null ? true : saved === 'true';
   });
 
-  const login = (email, password) => {
-    const namePart = email.split('@')[0];
-    const nameFormatted = namePart.replace(/[._-]/g, ' ').replace(/\b\w/g, str => str.toUpperCase());
-    const newUser = {
-      name: nameFormatted || 'Sarah Chen',
-      email,
-      role: 'Engineering Lead',
-      initials: (namePart.substring(0, 2) || 'SC').toUpperCase()
-    };
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('syncboard_user', JSON.stringify(newUser));
-    localStorage.setItem('syncboard_logged_in', 'true');
+  const login = async (email, password) => {
+    const res = await apiService.login(email, password);
+    if (res && res.token) {
+      setUser(res.user);
+      setIsAuthenticated(true);
+      localStorage.setItem('syncboard_user', JSON.stringify(res.user));
+      localStorage.setItem('syncboard_token', res.token);
+      localStorage.setItem('syncboard_logged_in', 'true');
+      return true;
+    } else {
+      // Fallback for demo without backend
+      const namePart = email.split('@')[0];
+      const nameFormatted = namePart.replace(/[._-]/g, ' ').replace(/\b\w/g, str => str.toUpperCase());
+      const newUser = {
+        name: nameFormatted || 'Sarah Chen',
+        email,
+        role: 'Engineering Lead',
+        initials: (namePart.substring(0, 2) || 'SC').toUpperCase()
+      };
+      setUser(newUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('syncboard_user', JSON.stringify(newUser));
+      localStorage.setItem('syncboard_logged_in', 'true');
+      return true;
+    }
   };
 
-  const register = (fullName, email, role) => {
-    const initials = fullName
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase() || 'SC';
-    const newUser = { name: fullName, email, role: role || 'Software Engineer', initials };
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('syncboard_user', JSON.stringify(newUser));
-    localStorage.setItem('syncboard_logged_in', 'true');
+  const register = async (fullName, email, password, role) => {
+    const res = await apiService.register(fullName, email, password, role);
+    if (res && res.token) {
+      setUser(res.user);
+      setIsAuthenticated(true);
+      localStorage.setItem('syncboard_user', JSON.stringify(res.user));
+      localStorage.setItem('syncboard_token', res.token);
+      localStorage.setItem('syncboard_logged_in', 'true');
+      return true;
+    } else {
+      const initials = fullName
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase() || 'SC';
+      const newUser = { name: fullName, email, role: role || 'Software Engineer', initials };
+      setUser(newUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('syncboard_user', JSON.stringify(newUser));
+      localStorage.setItem('syncboard_logged_in', 'true');
+      return true;
+    }
   };
 
   const logout = () => {
