@@ -269,7 +269,7 @@ export default function TaskModal() {
               </button>
             </div>
           </form>
-        ) : (
+        ) : activeTab === 'comments' ? (
           <div className="modal-comments-section">
             {/* New Comment Input */}
             <form onSubmit={handleAddComment} className="add-comment-box">
