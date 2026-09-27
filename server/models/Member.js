@@ -5,6 +5,7 @@ const memberSchema = new mongoose.Schema(
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
+    password: { type: String, required: false }, // false for Google Auth users
     role: { type: String, default: 'Software Engineer' },
     initials: { type: String, default: 'TM' },
     color: { type: String, default: '#8b5cf6' },
