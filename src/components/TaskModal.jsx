@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageSquare, Clock, Send, CheckCircle2, User } from 'lucide-react';
+import { X, MessageSquare, Clock, Send, CheckCircle2, User, ListChecks } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useTasks } from '../context/TasksContext';
 import './TaskModal.css';
 
@@ -17,6 +18,8 @@ export default function TaskModal() {
   const [assigneeId, setAssigneeId] = useState('sc');
   const [dueDate, setDueDate] = useState('Aug 30, 2026');
   const [storyPoints, setStoryPoints] = useState('5');
+  const [subtasks, setSubtasks] = useState([]);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
   // Comments Stream State
   const [comments, setComments] = useState([
@@ -49,6 +52,7 @@ export default function TaskModal() {
       setAssigneeId(selectedTask.assigneeId || 'sc');
       setDueDate(selectedTask.dueDate || 'Aug 30, 2026');
       setStoryPoints(selectedTask.storyPoints ? String(selectedTask.storyPoints) : '5');
+      setSubtasks(selectedTask.subtasks || []);
     } else {
       setColumnId(defaultColumnId || 'backlog');
     }
@@ -71,6 +75,18 @@ export default function TaskModal() {
     setNewComment('');
   };
 
+  const handleAddSubtask = (e) => {
+    e.preventDefault();
+    if (!newSubtaskTitle.trim()) return;
+    setSubtasks([...subtasks, { id: Date.now(), title: newSubtaskTitle.trim(), isCompleted: false }]);
+    setNewSubtaskTitle('');
+  };
+
+  const toggleSubtask = (id) => {
+    setSubtasks(subtasks.map(st => st.id === id ? { ...st, isCompleted: !st.isCompleted } : st));
+  };
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -84,7 +100,8 @@ export default function TaskModal() {
         category,
         assigneeId,
         dueDate,
-        storyPoints: parseInt(storyPoints, 10)
+        storyPoints: parseInt(storyPoints, 10),
+        subtasks
       });
     } else {
       addTask({
@@ -95,7 +112,8 @@ export default function TaskModal() {
         category,
         assigneeId,
         dueDate,
-        storyPoints: parseInt(storyPoints, 10)
+        storyPoints: parseInt(storyPoints, 10),
+        subtasks
       });
     }
 
@@ -122,6 +140,13 @@ export default function TaskModal() {
                 >
                   <MessageSquare size={13} />
                   <span>Comments & Activity ({comments.length})</span>
+                </button>
+                <button
+                  className={`modal-tab-btn ${activeTab === 'subtasks' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('subtasks')}
+                >
+                  <ListChecks size={13} />
+                  <span>Subtasks ({subtasks.length})</span>
                 </button>
               </div>
             )}
@@ -155,6 +180,9 @@ export default function TaskModal() {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
               ></textarea>
+              <div className="markdown-preview" style={{ marginTop: '10px', padding: '10px', backgroundColor: 'var(--surface-color)', borderRadius: '6px', fontSize: '13px' }}>
+                <ReactMarkdown>{description || '*No description provided*'}</ReactMarkdown>
+              </div>
             </div>
 
             {/* Row 1: Status Column & Priority */}
@@ -273,6 +301,34 @@ export default function TaskModal() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        ) : (
+          <div className="modal-subtasks-section" style={{ padding: '20px' }}>
+            <form onSubmit={handleAddSubtask} className="add-comment-box" style={{ marginBottom: '15px' }}>
+              <input
+                type="text"
+                placeholder="Add a new subtask..."
+                value={newSubtaskTitle}
+                onChange={e => setNewSubtaskTitle(e.target.value)}
+              />
+              <button type="submit" className="btn-primary post-btn">Add</button>
+            </form>
+            <div className="subtasks-list">
+              {subtasks.map(st => (
+                <div key={st.id} className="subtask-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', backgroundColor: 'var(--surface-color)', borderRadius: '6px', marginBottom: '8px' }}>
+                  <input
+                    type="checkbox"
+                    checked={st.isCompleted}
+                    onChange={() => toggleSubtask(st.id)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ textDecoration: st.isCompleted ? 'line-through' : 'none', color: st.isCompleted ? 'var(--text-muted)' : 'var(--text-color)' }}>
+                    {st.title}
+                  </span>
+                </div>
+              ))}
+              {subtasks.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>No subtasks added yet.</p>}
             </div>
           </div>
         )}

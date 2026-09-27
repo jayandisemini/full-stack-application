@@ -26,6 +26,39 @@ export const TasksProvider = ({ children }) => {
     return INITIAL_TEAM_MEMBERS;
   });
 
+  const INITIAL_COLUMNS = [
+    { id: 'backlog', title: 'Backlog', dotColor: '#94a3b8' },
+    { id: 'todo', title: 'To Do', dotColor: '#3b82f6' },
+    { id: 'inprogress', title: 'In Progress', dotColor: '#a855f7' },
+    { id: 'completed', title: 'Completed', dotColor: '#10b981' }
+  ];
+
+  const [columns, setColumns] = useState(() => {
+    const saved = localStorage.getItem('syncboard_columns');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return INITIAL_COLUMNS;
+  });
+
+  const addColumn = (title, dotColor) => {
+    const id = title.toLowerCase().replace(/\s+/g, '') + '-' + Date.now();
+    const newCol = { id, title, dotColor: dotColor || '#94a3b8' };
+    setColumns(prev => {
+      const next = [...prev, newCol];
+      localStorage.setItem('syncboard_columns', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const updateColumn = (id, newTitle) => {
+    setColumns(prev => {
+      const next = prev.map(c => c.id === id ? { ...c, title: newTitle } : c);
+      localStorage.setItem('syncboard_columns', JSON.stringify(next));
+      return next;
+    });
+  };
+
   // Fetch initial tasks & members from Backend API on mount
   useEffect(() => {
     async function loadData() {
@@ -176,7 +209,8 @@ export const TasksProvider = ({ children }) => {
         dueDate: newTaskData.dueDate || 'Aug 30, 2026',
         storyPoints: parseInt(newTaskData.storyPoints, 10) || 5,
         isOverdue: false,
-        notice: null
+        notice: null,
+        subtasks: newTaskData.subtasks || []
       };
 
       updateTasksState([newTask, ...tasks]);
@@ -275,6 +309,9 @@ export const TasksProvider = ({ children }) => {
       value={{
         tasks,
         filteredTasks,
+        columns,
+        addColumn,
+        updateColumn,
         teamMembers,
         addTeamMember,
         searchQuery,

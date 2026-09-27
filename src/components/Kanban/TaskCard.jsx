@@ -130,10 +130,12 @@ export default function TaskCard({ task }) {
             {task.extraTag}
           </span>
         )}
-        <span className="tag-pill tag-subtask-count">
-          <CheckSquare size={10} style={{ marginRight: 3 }} />
-          2/3 subtasks
-        </span>
+        {task.subtasks && task.subtasks.length > 0 && (
+          <span className="tag-pill tag-subtask-count">
+            <CheckSquare size={10} style={{ marginRight: 3 }} />
+            {task.subtasks.filter(s => s.isCompleted).length}/{task.subtasks.length} subtasks
+          </span>
+        )}
       </div>
 
       {/* Card Footer: Assignee & Due Date */}

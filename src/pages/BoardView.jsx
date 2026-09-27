@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Column from '../components/Kanban/Column';
 import { useTasks } from '../context/TasksContext';
-import { AlertTriangle, HelpCircle, Loader2 } from 'lucide-react';
+import { AlertTriangle, HelpCircle, Loader2, Plus } from 'lucide-react';
 import '../components/Kanban/Kanban.css';
 
 export default function BoardView() {
-  const { tasks, filteredTasks, stats, previewState } = useTasks();
+  const { tasks, filteredTasks, stats, previewState, columns, addColumn, openCreateModal } = useTasks();
 
-  const columns = [
-    { id: 'backlog', title: 'Backlog', dotColor: '#94a3b8' },
-    { id: 'todo', title: 'To Do', dotColor: '#3b82f6' },
-    { id: 'inprogress', title: 'In Progress', dotColor: '#a855f7' },
-    { id: 'completed', title: 'Completed', dotColor: '#10b981' }
-  ];
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger shortcuts if user is typing in an input/textarea
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      
+      if (e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        openCreateModal('backlog');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openCreateModal]);
 
   // Preview States Logic
   if (previewState === 'loading') {
@@ -75,6 +82,41 @@ export default function BoardView() {
             />
           );
         })}
+        
+        {/* Add Column Button */}
+        <div className="add-column-wrapper" style={{ minWidth: '280px', display: 'flex', alignItems: 'flex-start', padding: '10px' }}>
+          <button 
+            onClick={() => {
+              const name = window.prompt("Enter new column name:");
+              if (name) {
+                const { addColumn } = require('../context/TasksContext'); // Wait, useTasks already has addColumn
+              }
+            }}
+            style={{ display: 'none' }} 
+          />
+          <button
+            onClick={() => {
+              const name = window.prompt("Enter new column name:");
+              if (name && name.trim()) {
+                const colors = ['#94a3b8', '#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ef4444'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                // Note: we extract addColumn from useTasks hook above
+                addColumn(name.trim(), randomColor);
+              }
+            }}
+            style={{
+              width: '100%', padding: '12px', borderRadius: '8px', 
+              backgroundColor: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)',
+              color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            <Plus size={16} />
+            <span>Add Column</span>
+          </button>
+        </div>
       </div>
     </div>
   );
